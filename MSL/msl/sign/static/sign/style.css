@@ -1,0 +1,25 @@
+body {
+    /* background: url('../../static/sign/images/background.jpg'); */
+    background-color: #fef7ff;
+}
+
+li a {
+    color: brown;
+}
+
+.txt-italic {
+    font-style: italic;
+}
+
+
+.collapse {
+  &:not(.show) {
+    display: none;
+  }
+}
+
+.collapsing {
+  height: 0;
+  overflow: hidden;
+  @include transition($transition-collapse);
+}

@@ -1,0 +1,123 @@
+<!-- webcam.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Webcam Capture</title>
+</head>
+<body>
+  <h1>📷 Webcam Capture</h1>
+  <button id="startWebcamBtn">Start Webcam</button>
+  <button id="stopWebcamBtn">Stop Webcam</button>
+  <video id="video" autoplay playsinline width="640" height="480"></video>
+  <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+  <br>
+  <button id="photoBtn">Start Photo</button>
+  <button id="videoStartBtn">Start Video</button>
+  <button id="videoStopBtn" disabled>Stop Video</button>
+  <button id="saveBtn">Save</button>
+
+  <h2>Preview</h2>
+  <img id="preview" width="320">
+
+  <script>
+    const btn = document.getElementById('startWebcamBtn');
+     
+    btn.addEventListener('click', async () => {
+        if(!stream) {
+            //start the webcam
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                 btn.textContent = 'Stop Webcam';
+                video.play();
+                btn.disabled = true; // Disable button after starting webcam
+            } catch (err) {
+                console.error('Error accessing webcam:', err);
+            }
+        } else {
+            //stop the webcam
+            const video = document.getElementById('video');
+            const stream = video.srcObject;
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+                btn.disabled = false; // Enable button after stopping webcam
+                btn.textContent = 'Start Webcam';
+            }
+        }
+    });
+    // Set up video stream
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const preview = document.getElementById('preview');
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+    video.srcObject = stream;
+    }).catch(err => console.error(err));
+
+    // Photo capture
+    document.getElementById('photoBtn').onclick = () => {
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    preview.src = canvas.toDataURL('image/png');
+    };
+
+    // Video recording
+    let recorder, chunks = [];
+    document.getElementById('videoStartBtn').onclick = () => {
+    recorder = new MediaRecorder(video.srcObject);
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        preview.src = URL.createObjectURL(blob);
+    };
+    chunks = [];
+    recorder.start();
+    document.getElementById('videoStopBtn').disabled = false;
+    };
+
+    document.getElementById('videoStopBtn').onclick = () => {
+    recorder.stop();
+    document.getElementById('videoStopBtn').disabled = true;
+    };
+
+    // Save to server
+    document.getElementById('saveBtn').onclick = () => {
+    const dataUrl = preview.src;
+    fetch("{% url 'sign:webcam_save' %}", {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: JSON.stringify({ data: dataUrl })
+    }).then(r => r.json()).then(json => alert('Saved ID: ' + json.id));
+    };
+    
+    // Stop webcam when click button start video
+    document.getElementById('startWebcamBtn').onclick = () => {
+        const video = document.getElementById('video');
+        const stream = video.srcObject;
+        if (stream) {
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+            video.srcObject = null;
+        }
+    };
+
+    // stop webcam when click button stop video
+    document.getElementById('stopWebcamBtn').onclick = () => {
+        const video = document.getElementById('video');
+        const stream = video.srcObject;
+        if (stream) {
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+            video.srcObject = null;
+        }
+    };
+  </script>
+</body>
+</html>

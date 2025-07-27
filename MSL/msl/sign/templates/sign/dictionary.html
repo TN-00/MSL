@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .collapse {
+            &:not(.show) {
+                display: none;
+            }
+            }
+
+            .collapsing {
+            height: 0;
+            overflow: hidden;
+            transition: height 0.35s ease; 
+            }
+        </style>
+    </head>
+    <body>
+        <p> Welcome to our Mauritian Sign Language </p> 
+        <p style="text-decoration: italic;"> Bienvenue lor nou paz Lang des Sign Morisien </p>
+
+        <!-- if..endif -->
+        {% if latest_labels %}
+            <ul>
+                <!-- loop -->
+                {% for label in latest_labels %}
+                    <!-- <i>{{label.label_txt}}</i> -->
+                    <!-- <i><a href='{{label.id}}/detail'><b> {{label.label_txt}} </b></a></i> -->
+                    <!-- <i><a href='sign/{{label.id}}'><b> {{label.label_txt}} </b></a></i> -->
+                    <!-- <li><a href="{% url 'sign:detail' label_id=label.id %}"><b> {{ label.label_txt }} </b></a></li> -->
+                    <!-- <li><a href="{% url 'sign:dictionary' label_id=label.id %}"><span>{{ label.label_txt }}</span></a></li> -->
+                    
+                    <!-- <i><a href="{% url 'sign:dictionary' label_id=label.id %}"><b> {{label.label_txt}} </b></a></i> -->
+                    <i><a href="{% url 'sign:detail' label_id=label.id %}"><b> {{label.label_txt}} </b></a></i>
+                    <!-- <span>{{ label.description }}</p> -->
+
+                {% endfor %}
+            </ul>
+        {% else %}
+            
+        {% endif %}
+        <div>
+            <p>
+                <a class="btn btn-primary" data-bs-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">MSL alphabet</a>
+            </p>
+            <div class="row">
+            <div class="col">
+                <div class="collapse multi-collapse" id="multiCollapseExample1">
+                <div class="card card-body">
+                    <img src="../../static/sign/images/MSL alphabets.png" alt="MSL alphabets" style="max-width: 500px; max-height: 500px;"> 
+                </div>
+                </div>
+            </div>
+            </div>
+            
+        </div>
+    </body>
+</html>
+
+
+
+

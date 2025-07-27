@@ -1,0 +1,45 @@
+ <!-- <h1>Live Hand Gesture Detection</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480" hidden></canvas>
+    <p id="gesture">Gesture: ...</p>
+
+<script>
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            const video = document.getElementById('video');
+            video.srcObject = stream;
+
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+
+            setInterval(() => {
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = canvas.toDataURL('image/jpeg');
+
+                fetch('/detect/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ image: imageData })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('gesture').innerText = 'Gesture: ' + data.gesture;
+                });
+            }, 1000);
+        });
+</script> -->
+
+<video id="video" width="640" height="480" autoplay></video>
+
+<script>
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => {
+    document.getElementById('video').srcObject = stream;
+})
+.catch(err => {
+    console.error("Error accessing webcam:", err);
+});
+</script>

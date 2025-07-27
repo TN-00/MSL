@@ -1,0 +1,27 @@
+<div class="card-body">
+    <video id="player" autoplay></video>
+    <button class="btn btn-primary" id="start">Start</button>
+    <button class="btn btn-secondary" id="stop">Stop</button>
+    <script>
+    let recorder, chunks = [];
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+        player.srcObject = stream;
+        recorder = new MediaRecorder(stream);
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            chunks = [];
+            const form = new FormData();
+            form.append('video', blob, 'capture.webm');
+            fetch('/upload_video/', {
+            method: 'POST',
+            body: form,
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+            });
+        };
+        });
+    start.onclick = () => recorder.start();
+    stop.onclick = () => recorder.stop();
+    </script>
+</div>

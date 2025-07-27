@@ -1,0 +1,133 @@
+<div style="padding: 1rem;">
+    <p>Enter an alphabet or number / <span style="text-decoration: italic;"> Ekrir enn alphabet ou numero</span> </p>
+    <!-- input to add text and retrieve data from database -->
+    <form method="POST" action="">
+        
+        {% csrf_token %}
+        <textarea name="text_input" rows="1" cols="50" placeholder="Enter text here..."></textarea><br>
+        <input type="submit" value="Submit" class="btn btn-primary" style="background-color: #65558F ;">
+    </form>
+    
+    <!-- Display the images -->
+    {% for signimg in signimg_list %}
+    {% if signimg.signimg_img %}
+        <img src="{{ signimg.signimg_img.url }}" alt="{{ signimg.title }}" style="max-width:200px;">
+    {% else %}
+        <p>No image available for {{ signimg.label.label_txt }}</p>
+    {% endif %}
+    {% endfor %}
+    <!-- Display the text input -->
+    <div id="display_result">
+    <!-- <p>test</p> -->
+    </div>
+    {% if text_input %}
+        <h2>Submitted Text:</h2>
+        <p>{{ text_input }}</p>
+    {% endif %}
+
+    {% if images %}
+        <h2>Generated Images:</h2>
+        <div class="image-gallery">
+            {% for image in images %}
+                <div class="image-item">
+                    <!-- {{ image.url }} -->
+                    <img src="" alt="Generated Image" style="max-width: 200px; max-height: 200px;">
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <!-- Display the video -->
+    {% if video_url %}
+        <h2>Generated Video:</h2>
+        <video width="320" height="240" controls>
+            <source src="{{ video_url }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    {% endif %}
+
+</div>
+
+<script>
+    // JavaScript to handle the display of images
+    document.addEventListener('DOMContentLoaded', function() {
+        const displayImgDiv = document.getElementById('display_img');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+            
+            fetch('D:/MasterDegree/MSL/msl/media/signimg_images', {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for security
+                }
+            });
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for security
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the response data (e.g., display the images)
+                console.log(data);
+                document.getElementById('display_result').innerHTML = data.image_url
+                ? `<img src="${data.image_url}" alt="Generated Image" style="max-width: 200px; max-height: 200px;">` 
+                : '<p>No image generated.</p>';
+            });
+
+            // Get the text input value
+            const textInput = document.querySelector('textarea[name="text_input"]').value;
+            
+            // Display the text input in the display_img div
+            displayImgDiv.innerHTML = `<h2>Submitted Text:</h2><p>${textInput}</p>`;
+        });
+        const formData = new FormData(document.querySelector('form'));
+        // Fetch the images from the server
+        fetch('D:/MasterDegree/MSL/msl/media/signimg_images', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for security
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Handle the response data (e.g., display the images)
+            console.log(data);
+        })
+        .catch(error => {
+            console.error('Error fetching images:', error);
+        });
+        // Fetch the video URL from the server
+        fetch('D:/MasterDegree/MSL/msl/media/signimg_video')
+        .then(response => response.json())
+        .then(data => { 
+            // Handle the video URL response
+            const videoUrl = data.video_url;
+            if (videoUrl) {
+                const videoElement = document.querySelector('video');
+                videoElement.src = videoUrl;
+            }
+        })  
+        .catch(error => {
+            console.error('Error fetching video:', error);
+        });
+        
+        const displayResultDiv = document.getElementById('display_result');
+        if (text_input) {
+            displayResultDiv.innerHTML = `<h2>Submitted Text:</h2><p>${text_input}</p>`;
+        }
+        if (images) { 
+            let imagesHtml = '<h2>Generated Images:</h2><div class="image-gallery">';
+            images.forEach(image => {
+                imagesHtml += `<div class="image-item"><img src="${image.url}" alt="Generated Image" style="max-width: 200px; max-height: 200px;"></div>`;
+            });
+            imagesHtml += '</div>';
+            displayResultDiv.innerHTML += imagesHtml;
+        } else {
+            displayResultDiv.innerHTML += '<p>No images generated.</p>';
+        }
+    });
+</script>

@@ -1,0 +1,20 @@
+{% extends 'sign/base.html' %}
+{% block main_content %}
+
+
+<h1>{{label.label_txt}}</h1>
+<p>
+    <!-- to display the list through pagination -->
+    {% for signimg in label.signimg_set.all %}
+        <li>{{signimg.signimg_img}}</li>
+        <!-- <img src="{{ signimg.signimg_img.url }}" alt="Sign Image" style="max-width: 300px; max-height: 300px;"> -->
+        <!-- <p>{{ signimg.signimg_desc }}</p> -->
+    {% endfor %}
+</p>
+
+<p>
+    
+    <a href="{% url 'sign:dictionary' %}">Back to Dictionary</a>
+</p>
+
+{% endblock %}

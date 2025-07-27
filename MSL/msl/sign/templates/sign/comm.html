@@ -1,0 +1,117 @@
+<div style="padding: 1rem;">
+    <p>Click to start the webcam and begin signing.</p>
+    <button id="startWebcam" class="btn btn-primary" style="background-color: #65558F ;">Try Camera</button>
+    <div id="webcamContainer" style="display: none;">
+        
+    
+        <button id="stopWebcam" class="btn btn-secondary">Close</button>
+        
+        <div id="signOutput" style="margin-top: 20px;"></div>
+        <canvas id="canvas" hidden></canvas>
+        <video id="webcam" autoplay playsinline></video>
+        <!-- webcam capture -->
+        <br>
+        <button id="photoBtn"> Start Photo</button>
+        <button id="videoStartBtn">Start Video</button>
+        <button id="videoStopBtn" disabled>Stop Video</button>
+        <button id="saveBtn">Save</button>
+        <h2>Preview</h2>
+    </div>
+</div>
+
+
+
+<script>
+    const ws = new WebSocket(`ws://${window.location.host}/ws/position/`);
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    document.getElementById('startWebcam').addEventListener('click', async () => {
+        const webcamContainer = document.getElementById('webcamContainer');
+        const webcam = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        canvas.width = 100; // Set canvas width
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        setInterval(() => {
+            ctx.drawImage(video, 0, 0);
+            canvas.toBlob(blob => ws.send(blob), 'image/jpeg', 0.7);
+            }, 200); // send ~5 FPS
+
+        canvas.height = 100; // Set canvas height
+        const signOutput = document.getElementById('signOutput');
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            webcam.srcObject = stream;
+            webcamContainer.style.display = 'block';
+
+            // Placeholder for sign recognition logic
+            signOutput.textContent = 'Start signing...';
+
+            // to manipulate the video stream and position a person in front of the webcam
+            // to detect face and hands in the video stream
+                        
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => { video.srcObject = stream; });
+
+            ws.onmessage = e => {
+            const data = JSON.parse(e.data);
+            ctx.clearRect(0, 0, 640, 480);
+            // e.g. data.status: "centered" or "move left"
+            data.boxes.forEach(box => {
+                // Draw bounding boxes on the canvas
+                ctx.strokeStyle = 'red';
+                ctx.strokeStyle = box.type === 'face' ? 'blue' : 'green';
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(box.x, box.y, box.width, box.height);
+            });
+            };
+
+            
+            // to ensure that the person is from head to waist level, else send an information to tell the person that s/he should stand from head to waist level to sign MSL
+
+
+            // Stop the webcam when the button is clicked
+            document.getElementById('stopWebcam').addEventListener('click', () => {
+                stream.getTracks().forEach(track => track.stop());
+                webcamContainer.style.display = 'none';
+                signOutput.textContent = '';
+            });
+
+        } catch (error) {
+            console.error('Error accessing webcam:', error);
+            signOutput.textContent = 'Error accessing webcam. Please check permissions.';
+        }
+    });
+
+    // to save the captured image
+    document.getElementById('saveBtn').addEventListener('click', () => {
+        const dataURL = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = 'captured_image.png';
+        link.click();
+    });
+</script>
+
+
+<img id="preview" width="320">
+
+<!-- This code initializes the webcam and allows the user to start and stop it. --> 
+
+
+<!-- to integrate a machine learning model or a library --> 
+
+<!-- to add sign recognition logic here to process the video stream and recognize signs. -->
+  
+<!-- to handle the video stream and recognition logic appropriately. -->
+<!-- to display the recognized sign in the signOutput div. -->
+<!-- to ensure the user has granted permission to access the webcam. -->
+<!-- to handle errors gracefully and inform the user if the webcam cannot be accessed. -->
+<!-- to style the buttons and output as needed. -->
+<!-- to ensure the video element is styled correctly for the webcam display. -->

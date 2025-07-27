@@ -1,0 +1,18 @@
+{% for item in items %}
+  <div class="media-item">
+    <h3>{{ item.title }}</h3>
+    <p>{{ item.description }}</p>
+    {% if item.image %}
+      <img src="{{ item.image.url }}" alt="{{ item.title }}" width="300">
+    {% endif %}
+    {% if item.video %}
+      <video width="480" controls>
+        <source src="{{ item.video.url }}">
+        Your browser doesn't support video.
+      </video>
+    {% endif %}
+  </div>
+{% endfor %}
+{% if items|length == 0 %}
+  <p>No items found.</p>
+{% endif %}

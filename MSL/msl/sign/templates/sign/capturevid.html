@@ -1,0 +1,25 @@
+<video id="preview" autoplay muted width="320"></video>
+<button id="start">Start</button>
+<button id="stop">Stop</button>
+<script>
+  const preview = document.getElementById('preview');
+  let rec, chunks = [];
+
+  navigator.mediaDevices.getUserMedia({video: true, audio: true})
+    .then(stream => {
+      preview.srcObject = stream;
+      rec = new MediaRecorder(stream);
+      rec.ondataavailable = e => chunks.push(e.data);
+      rec.onstop = () => {
+        const blob = new Blob(chunks, {type: 'video/webm'});
+        const fd = new FormData();
+        fd.append('video', blob, 'capture.webm');
+        fetch('/upload_video/', { method: 'POST', body: fd })
+          .then(r => r.json()).then(console.log);
+        chunks = [];
+      };
+    });
+
+  document.getElementById('start').onclick = () => rec.start();
+  document.getElementById('stop').onclick = () => rec.stop();
+</script>

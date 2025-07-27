@@ -1,0 +1,24 @@
+<video id="video" autoplay playsinline width="320"></video>
+<button id="snap">Take Photo</button>
+<canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const snap = document.getElementById('snap');
+
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => video.srcObject = stream)
+    .catch(console.error);
+
+  snap.onclick = () => {
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/png');
+    fetch('/upload_image/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json'},
+      body: JSON.stringify({image: dataUrl})
+    }).then(r => r.json()).then(console.log);
+  };
+</script>
+
